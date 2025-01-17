@@ -1,0 +1,31 @@
+name: .NET Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - master  # Trigger only when the PR targets the master branch
+    types: [opened, synchronize, reopened]  # Trigger for these PR events
+    # Specify the base branch as 'master' and the source branch as 'develop'
+    # This can be done by adding 'if' condition on job or manually reviewing PR source/target
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  # You can change the OS if needed
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0'  # Replace with the version of .NET you're using
+
+      - name: Disable .NET CLI telemetry
+        run: echo "DOTNET_CLI_TELEMETRY_OPTOUT=1" >> $GITHUB_ENV
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run unit tests
+        run: dotnet test --no-restore
