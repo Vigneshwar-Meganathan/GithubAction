@@ -3,7 +3,7 @@ name: .NET Unit Tests
 on:
   pull_request:
     branches:
-      - develop  # Trigger only when the PR targets the develop branch
+      - Develop  # Trigger only when the PR targets the develop branch
     types: [opened, synchronize, reopened]  # Trigger for these PR events
 
 jobs:
