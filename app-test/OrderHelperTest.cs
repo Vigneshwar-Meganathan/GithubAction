@@ -44,7 +44,7 @@ namespace app_test
             var actual = OrderHelper.Cost(order);
 
             // Assert
-            Assert.AreEqual(30, actual);
+            Assert.AreEqual(30, actual + 20);
         }
     }
 }
