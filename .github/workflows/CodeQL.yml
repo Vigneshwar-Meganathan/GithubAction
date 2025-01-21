@@ -30,7 +30,7 @@ jobs:
         with:
           languages: '${{ matrix.language }}'
       - name: Run CodeQL analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
         with:
           additional-queries: security-and-quality
           ram: 16000
