@@ -1,27 +1,47 @@
-name: Verify PR Title and Description
+name: CodeQL Analysis
 
 on:
   pull_request:
-    types: [opened, edited]
+    branches:
+      - Develop  # Analyze code on PRs to the Develop branch
 
 jobs:
-  verify-pr-title-and-description:
+  analyze:
+    name: Analyze CodeQL
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Verify PR title and description format
-        run: |
-          title="${{ github.event.pull_request.title }}"
-          description="${{ github.event.pull_request.body }}"
-          regex="^SCRUM-[0-9]+ .+$"
+    permissions:
+      actions: read
+      contents: read
+      security-events: write  # Required for code scanning alerts
 
-          echo "Checking PR title and description..."
-          if [[ ! "$title" =~ $regex ]]; then
-            echo "❌ PR title does not match the required pattern: SCRUM-<number> <message>"
-            exit 1
-          fi
-          if [[ ! "$description" =~ $regex ]]; then
-            echo "❌ PR description does not match the required pattern: SCRUM-<number> <message>"
-            exit 1
-          fi
-          echo "✅ Title and description are valid."
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp' ]  # Use csharp for .NET Core projects
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+		
+	  - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.0'  # Update to the .NET Core version your project uses
+		  
+      - name: Run CodeQL analysis
+		uses: github/codeql-action/analyze@v2
+		with:
+		  additional-queries: security-and-quality
+		  ram: 16000
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
