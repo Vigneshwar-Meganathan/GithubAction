@@ -33,10 +33,10 @@ jobs:
           dotnet-version: '7.0'  # Update to the .NET Core version your project uses
 		  
       - name: Run CodeQL analysis
-		uses: github/codeql-action/analyze@v2
-		with:
-		  additional-queries: security-and-quality
-		  ram: 16000
+	uses: github/codeql-action/analyze@v2
+	with:
+	  additional-queries: security-and-quality
+	  ram: 16000
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
