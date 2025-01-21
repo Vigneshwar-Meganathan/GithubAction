@@ -1,0 +1,27 @@
+name: Verify PR Title and Description
+
+on:
+  pull_request:
+    types: [opened, edited]
+
+jobs:
+  verify-pr-title-and-description:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify PR title and description format
+        run: |
+          title="${{ github.event.pull_request.title }}"
+          description="${{ github.event.pull_request.body }}"
+          regex="^SCRUM-[0-9]+ .+$"
+
+          echo "Checking PR title and description..."
+          if [[ ! "$title" =~ $regex ]]; then
+            echo "❌ PR title does not match the required pattern: SCRUM-<number> <message>"
+            exit 1
+          fi
+          if [[ ! "$description" =~ $regex ]]; then
+            echo "❌ PR description does not match the required pattern: SCRUM-<number> <message>"
+            exit 1
+          fi
+          echo "✅ Title and description are valid."
