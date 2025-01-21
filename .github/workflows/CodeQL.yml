@@ -25,14 +25,14 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '7.0'
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: '${{ matrix.language }}'
       - name: Run CodeQL analysis
         uses: github/codeql-action/analyze@v2
         with:
           additional-queries: security-and-quality
           ram: 16000
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: '${{ matrix.language }}'
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
