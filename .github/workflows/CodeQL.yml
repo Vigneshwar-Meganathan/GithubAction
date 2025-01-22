@@ -5,6 +5,10 @@ on:
     branches:
       - Develop
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   codeql-analysis:
     runs-on: ubuntu-latest
