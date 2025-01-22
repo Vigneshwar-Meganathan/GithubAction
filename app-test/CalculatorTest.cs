@@ -20,7 +20,7 @@ namespace app_test
 
             // Deliberately introducing a null check issue
             Calculator calc = null; 
-            var actual = calc.Add(value, value); // This will throw a NullReferenceException
+            var actual = Calculator.Add(value, value); // Correctly access static method
 
             var expected = value + value;
             Assert.AreEqual(actual, expected); // Possible test failure
