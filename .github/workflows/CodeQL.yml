@@ -23,6 +23,9 @@ jobs:
         with:
           dotnet-version: '7.0'
 
+      - name: Check available CPUs
+        run: cat /sys/fs/cgroup/cpuset.cpus.effective
+
       - name: Restore .NET dependencies
         run: dotnet restore
 
