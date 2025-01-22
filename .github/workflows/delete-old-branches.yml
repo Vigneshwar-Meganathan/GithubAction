@@ -16,6 +16,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.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 }}
         run: |
+          echo "Authenticating GitHub CLI..."
+          gh auth login --with-token <<< "$GH_TOKEN"
           gh auth status
 
       - name: Delete branches older than 10 minutes
