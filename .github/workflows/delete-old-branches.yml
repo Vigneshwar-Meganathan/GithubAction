@@ -1,7 +1,9 @@
 name: Delete Old Branches
 
 on:
-  workflow_dispatch: # Allows manual triggering of the workflow
+  pull_request:
+    branches:
+      - Develop
 
 jobs:
   delete_old_branches:
