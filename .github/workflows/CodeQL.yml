@@ -26,12 +26,6 @@ jobs:
       - name: Check available CPUs
         run: cat /sys/fs/cgroup/cpuset.cpus.effective
 
-      - name: Run CodeQL analysis
-        uses: github/codeql-action/analyze@v2
-        with:
-          threads: 4
-
-
       - name: Restore .NET dependencies
         run: dotnet restore
 
@@ -42,6 +36,11 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: csharp
+
+      - name: Run CodeQL analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          threads: 4
 
       - name: Run CodeQL analysis
         uses: github/codeql-action/analyze@v3
