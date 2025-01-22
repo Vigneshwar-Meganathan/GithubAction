@@ -36,4 +36,4 @@ jobs:
 
       # Step 6: Run CodeQL analysis (finalizes the database and runs queries)
       - name: Run CodeQL analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
