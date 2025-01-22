@@ -19,11 +19,11 @@ namespace app_test
             Console.WriteLine("Testing {0} + {0}", value);
 
             // Deliberately introducing a null check issue
-            Calculator calc = null; 
-            var actual = Calculator.Add(value, value); // Correctly access static method
+            Calculator calc = null;
+            var actual = calc.Add(value, value); // Will throw NullReferenceException at runtime
 
             var expected = value + value;
-            Assert.AreEqual(actual, expected); // Possible test failure
+            Assert.AreEqual(actual, expected); // This could be detected by CodeQL
         }
 
         [TestMethod]
@@ -31,7 +31,8 @@ namespace app_test
         public void Subtract()
         {
             // Incorrect expected value to ensure test fails
-            Assert.AreEqual(3, 2); 
+            var actual = 2 - 1;
+            Assert.AreEqual(3, actual); // This will definitely fail
         }
 
 #if DEBUG
@@ -52,7 +53,7 @@ namespace app_test
 #endif
 
         // Intentionally unused method to simulate dead code
-        public void UnusedHelperMethod()
+        private void UnusedHelperMethod()
         {
             Console.WriteLine("This method is not used anywhere.");
         }
