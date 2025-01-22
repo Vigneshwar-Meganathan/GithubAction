@@ -1,4 +1,4 @@
-using System; // Unused namespace
+using System;
 using app;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,7 +7,7 @@ namespace app_test
     [TestClass]
     public class CalculatorTest
     {
-        // Intentionally public field without encapsulation (for CodeQL to flag)
+        // Intentionally using a public field instead of private for CodeQL to flag
         public int PublicFieldWithoutEncapsulation; 
 
         [DataTestMethod]
@@ -16,49 +16,40 @@ namespace app_test
         [DataRow(2)]
         public void Add(int value)
         {
-#if DEBUG
             Console.WriteLine("Testing {0} + {0}", value);
 
-            // Prevent runtime exception but leave the issue detectable by CodeQL
+            // Deliberately introducing a null check issue
             Calculator calc = null; 
-            if (calc != null) 
-            {
-                var actual = calc.Add(value, value); // CodeQL should flag null usage
-                var expected = value + value;
-                Assert.AreEqual(actual, expected); // Possible test failure
-            }
-#endif
+            var actual = calc.Add(value, value); // This will throw a NullReferenceException
+
+            var expected = value + value;
+            Assert.AreEqual(actual, expected); // Possible test failure
         }
 
         [TestMethod]
         [Priority(1)]
         public void Subtract()
         {
-            // Incorrect expected value to ensure test fails in CodeQL, not runtime
-            Assert.AreEqual(2, 2); // Intentionally correct for build success
+            // Incorrect expected value to ensure test fails
+            Assert.AreEqual(3, 2); 
         }
 
+#if DEBUG
+        // Only include these tests in debug mode when methods are implemented.
         [TestMethod]
         [TestCategory("DivideAndMultiply")]
         public void Divide()
         {
-            // Deliberate lack of edge case checks (for CodeQL to flag division by zero)
-            var divisor = 0;
-            if (divisor != 0) // Prevent runtime failure
-            {
-                var result = Calculator.Divide(4, divisor); // CodeQL should flag division by zero possibility
-                Assert.AreEqual(result, 0); // Incorrect assertion
-            }
+            Assert.Inconclusive("Divide method not implemented.");
         }
 
         [TestMethod]
         [TestCategory("DivideAndMultiply")]
         public void Multiply()
         {
-            // Use hardcoded assertion unrelated to actual logic (detectable by CodeQL)
-            var result = Calculator.Multiply(2, 3); // Assume the method exists
-            Assert.AreEqual(result, 0); // Intentional failure
+            Assert.Inconclusive("Multiply method not implemented.");
         }
+#endif
 
         // Intentionally unused method to simulate dead code
         public void UnusedHelperMethod()
