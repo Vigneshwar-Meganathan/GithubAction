@@ -14,7 +14,7 @@ jobs:
 
       - name: Authenticate with GitHub CLI
         env:
-          GH_TOKEN: ${{ secrets.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 }}
+          GH_TOKEN: ${{ secrets.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 }}
         run: |
           echo "Authenticating GitHub CLI..."
           gh auth login --with-token <<< "$GH_TOKEN"
@@ -22,7 +22,7 @@ jobs:
 
       - name: Delete branches older than 10 minutes
         env:
-          GH_TOKEN: ${{ secrets.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 }}
+          GH_TOKEN: ${{ secrets.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 }}
         run: |
           echo "Fetching branches from the GitHub repository..."
           branches=$(gh api repos/${{ github.repository }}/branches --jq '.[].name')
