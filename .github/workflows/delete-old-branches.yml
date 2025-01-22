@@ -20,7 +20,7 @@ jobs:
           branches=$(gh api repos/${{ github.repository }}/branches --jq '.[].name')
 
           now=$(date +%s)
-          excluded_branches=("develop" "master" "feature-1")
+          excluded_branches=("Develop" "Master" "Feature-1")
 
           for branch in $branches; do
             # Skip excluded branches
