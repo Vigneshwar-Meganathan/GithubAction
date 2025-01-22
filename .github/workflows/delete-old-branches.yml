@@ -12,9 +12,15 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
+      - name: Authenticate with GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.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 }}
+        run: |
+          gh auth status
+
       - name: Delete branches older than 10 minutes
         env:
-          GITHUB_TOKEN: ${{ secrets.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 }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Fetching branches from the GitHub repository..."
           branches=$(gh api repos/${{ github.repository }}/branches --jq '.[].name')
