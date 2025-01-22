@@ -10,27 +10,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Step 2: Set up .NET SDK
       - name: Set up .NET SDK
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '7.0'
 
+      # Step 3: Restore dependencies
       - name: Restore dependencies
         run: dotnet restore
 
+      # Step 4: Initialize CodeQL
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
           languages: csharp
 
+      # Step 5: Build the project (this generates the required database for CodeQL)
       - name: Build the project
         run: dotnet build --no-incremental --configuration Release
 
-      - name: Finalize CodeQL database
-        uses: github/codeql-action/finalize@v2
-
+      # Step 6: Run CodeQL analysis (finalizes the database and runs queries)
       - name: Run CodeQL analysis
         uses: github/codeql-action/analyze@v2
