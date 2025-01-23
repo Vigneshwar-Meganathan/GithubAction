@@ -12,51 +12,18 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
-      - name: Authenticate with GitHub CLI
-        env:
-          GH_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+      - name: Bash script to delete branches older than 3 months
         run: |
-          echo "Authenticating GitHub CLI..."
-          gh auth login --with-token <<< "$GH_TOKEN"
-          gh auth status
-
-      - name: Delete branches older than 10 minutes
-        env:
-          GH_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-        run: |
-          echo "Fetching branches from the GitHub repository..."
-          branches=$(gh api repos/${{ github.repository }}/branches --jq '.[].name')
-
-          now=$(date +%s)
-          excluded_branches=("Develop" "Master" "Feature-1")
-
-          for branch in $branches; do
-            # Skip excluded branches
-            if [[ " ${excluded_branches[@]} " =~ " $branch " ]]; then
-              echo "Skipping excluded branch: $branch"
-              continue
-            fi
-
-            # Skip protected branches
-            protection=$(gh api repos/${{ github.repository }}/branches/$branch/protection --silent || true)
-            if [[ -n "$protection" ]]; then
-              echo "Skipping protected branch: $branch"
-              continue
-            fi
-
-            # Get the last commit date of the branch
-            last_commit_date=$(gh api repos/${{ github.repository }}/commits/$branch --jq '.commit.committer.date' || true)
-            if [[ -z "$last_commit_date" ]]; then
-              echo "No commit date found for branch: $branch"
-              continue
-            fi
-
-            # Calculate branch age in seconds
-            branch_age=$((now - $(date -d "$last_commit_date" +%s)))
-            if ((branch_age > 600)); then # 10 minutes = 600 seconds
-              echo "Deleting branch: $branch"
-              gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch || echo "Failed to delete branch: $branch"
+          git fetch --prune
+          # Loop through all remote merged branches
+          for branch in $(git branch -r | grep -v HEAD | grep -v develop | grep -v master | sed '/\*/d'); do
+            if [ -z "$(git log -1 --since='3 months ago' -s ${branch})" ]; then
+              echo "Branch $branch is older than 3 months."
+              echo -e "$(git show --format='%ci %cr %an' ${branch} | head -n 1) \t $branch"
+              remote_branch=$(echo ${branch} | sed 's#origin/##')
+              # Uncomment the following line to delete the branch
+              git push origin --delete ${remote_branch}
             else
-              echo "Branch $branch is less than 10 minutes old."
+              echo "Branch $branch is not older than 3 months."
             fi
           done
