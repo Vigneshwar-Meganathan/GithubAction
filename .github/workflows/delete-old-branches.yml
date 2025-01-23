@@ -1,4 +1,4 @@
-name: Delete Old Branches
+name: Delete Old Branches 10 mins
 
 on:
   pull_request:
