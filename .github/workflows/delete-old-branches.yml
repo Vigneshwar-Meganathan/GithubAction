@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - Develop
+      - master
 
 jobs:
   delete_old_branches:
@@ -12,18 +13,30 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
-      - name: Bash script to delete branches older than 3 months
+      - name: Bash script to delete branches older than 10 minutes
         run: |
           git fetch --prune
-          # Loop through all remote merged branches
+          current_time=$(date +%s)
+
+          # Loop through all remote branches
           for branch in $(git branch -r | grep -v HEAD | grep -v develop | grep -v master | sed '/\*/d'); do
-            if [ -z "$(git log -1 --since='3 months ago' -s ${branch})" ]; then
-              echo "Branch $branch is older than 3 months."
-              echo -e "$(git show --format='%ci %cr %an' ${branch} | head -n 1) \t $branch"
-              remote_branch=$(echo ${branch} | sed 's#origin/##')
-              # Uncomment the following line to delete the branch
+            remote_branch=$(echo ${branch} | sed 's#origin/##')
+            
+            # Get the timestamp of the last commit in the branch
+            last_commit_time=$(git show -s --format=%ct ${branch})
+            branch_age_minutes=$(( (current_time - last_commit_time) / 60 ))
+
+            # Check if the branch is merged into Develop or Master
+            is_merged_to_develop=$(git branch --contains ${branch} origin/develop 2>/dev/null || echo "false")
+            is_merged_to_master=$(git branch --contains ${branch} origin/master 2>/dev/null || echo "false")
+
+            # Check if a pull request exists for the branch
+            pr_count=$(gh pr list --head ${remote_branch} --json number --jq 'length')
+
+            if [ ${branch_age_minutes} -gt 10 ] && ([ "$is_merged_to_develop" == "true" ] || [ "$is_merged_to_master" == "true" ]) && [ ${pr_count} -eq 0 ]; then
+              echo "Branch $branch is merged and older than 10 minutes. Deleting."
               git push origin --delete ${remote_branch}
             else
-              echo "Branch $branch is not older than 3 months."
+              echo "Branch $branch does not meet the deletion criteria."
             fi
           done
