@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - Develop
-      - master
+      - Master
 
 jobs:
   delete_old_branches:
@@ -19,7 +19,7 @@ jobs:
           current_time=$(date +%s)
 
           # Loop through all remote branches
-          for branch in $(git branch -r | grep -v HEAD | grep -v develop | grep -v master | sed '/\*/d'); do
+          for branch in $(git branch -r | grep -v HEAD | grep -v Develop | grep -v Master | sed '/\*/d'); do
             remote_branch=$(echo ${branch} | sed 's#origin/##')
             
             # Get the timestamp of the last commit in the branch
@@ -27,13 +27,13 @@ jobs:
             branch_age_minutes=$(( (current_time - last_commit_time) / 60 ))
 
             # Check if the branch is merged into Develop or Master
-            is_merged_to_develop=$(git branch --contains ${branch} origin/develop 2>/dev/null || echo "false")
-            is_merged_to_master=$(git branch --contains ${branch} origin/master 2>/dev/null || echo "false")
+            is_merged_to_Develop=$(git branch --contains ${branch} origin/Develop 2>/dev/null || echo "false")
+            is_merged_to_Master=$(git branch --contains ${branch} origin/Master 2>/dev/null || echo "false")
 
             # Check if a pull request exists for the branch
             pr_count=$(gh pr list --head ${remote_branch} --json number --jq 'length')
 
-            if [ ${branch_age_minutes} -gt 10 ] && ([ "$is_merged_to_develop" == "true" ] || [ "$is_merged_to_master" == "true" ]) && [ ${pr_count} -eq 0 ]; then
+            if [ ${branch_age_minutes} -gt 10 ] && ([ "$is_merged_to_Develop" == "true" ] || [ "$is_merged_to_Master" == "true" ]) && [ ${pr_count} -eq 0 ]; then
               echo "Branch $branch is merged and older than 10 minutes. Deleting."
               git push origin --delete ${remote_branch}
             else
