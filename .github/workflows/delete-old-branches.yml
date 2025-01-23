@@ -1,0 +1,62 @@
+name: Delete Old Branches
+
+on:
+  pull_request:
+    branches:
+      - Develop
+
+jobs:
+  delete_old_branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Authenticate with GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+        run: |
+          echo "Authenticating GitHub CLI..."
+          gh auth login --with-token <<< "$GH_TOKEN"
+          gh auth status
+
+      - name: Delete branches older than 10 minutes
+        env:
+          GH_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
+        run: |
+          echo "Fetching branches from the GitHub repository..."
+          branches=$(gh api repos/${{ github.repository }}/branches --jq '.[].name')
+
+          now=$(date +%s)
+          excluded_branches=("Develop" "Master" "Feature-1")
+
+          for branch in $branches; do
+            # Skip excluded branches
+            if [[ " ${excluded_branches[@]} " =~ " $branch " ]]; then
+              echo "Skipping excluded branch: $branch"
+              continue
+            fi
+
+            # Skip protected branches
+            protection=$(gh api repos/${{ github.repository }}/branches/$branch/protection --silent || true)
+            if [[ -n "$protection" ]]; then
+              echo "Skipping protected branch: $branch"
+              continue
+            fi
+
+            # Get the last commit date of the branch
+            last_commit_date=$(gh api repos/${{ github.repository }}/commits/$branch --jq '.commit.committer.date' || true)
+            if [[ -z "$last_commit_date" ]]; then
+              echo "No commit date found for branch: $branch"
+              continue
+            fi
+
+            # Calculate branch age in seconds
+            branch_age=$((now - $(date -d "$last_commit_date" +%s)))
+            if ((branch_age > 600)); then # 10 minutes = 600 seconds
+              echo "Deleting branch: $branch"
+              gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/$branch || echo "Failed to delete branch: $branch"
+            else
+              echo "Branch $branch is less than 10 minutes old."
+            fi
+          done
