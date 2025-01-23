@@ -18,15 +18,22 @@ jobs:
       - name: Bash script to delete branches older than 10 minutes
         run: |
           git fetch --prune
-          # Loop through all remote merged branches
-          for branch in $(git branch -r | grep -v HEAD | grep -v Develop | grep -v Master | grep -v Feature-1 | grep -v Feature-2 | grep -v Feature-3 | grep -v Feature-4 | sed '/\*/d'); do
-            if [ -z "$(git log -1 --since='10 minutes ago' -s ${branch})" ]; then
-              echo "Branch $branch is older than 10 minutes."
-              echo -e "$(git show --format='%ci %cr %an' ${branch} | head -n 1) \t $branch"
-              remote_branch=$(echo ${branch} | sed 's#origin/##')
-              # Uncomment the following line to delete the branch
-              git push origin --delete ${remote_branch}
+          # Loop through all remote branches
+          for branch in $(git branch -r | grep -v HEAD | grep -v origin/Develop | grep -v origin/Master | grep -v Feature-1 | grep -v Feature-2 | grep -v Feature-3 | grep -v Feature-4 | sed '/\*/d'); do
+            remote_branch=$(echo ${branch} | sed 's#origin/##')
+
+            # Check if the branch is merged into Develop or Master
+            if git branch -r --merged origin/Develop | grep -w ${branch} || git branch -r --merged origin/Master | grep -w ${branch}; then
+              # Check if the branch has no activity in the last 10 minutes
+              if [ -z "$(git log -1 --since='10 minutes ago' -s ${branch})" ]; then
+                echo "Branch $branch is older than 10 minutes and merged. Deleting..."
+                echo -e "$(git show --format='%ci %cr %an' ${branch} | head -n 1) \t $branch"
+                # Uncomment the following line to delete the branch
+                git push origin --delete ${remote_branch}
+              else
+                echo "Branch $branch is not older than 10 minutes."
+              fi
             else
-              echo "Branch $branch is not older than 10 minutes."
+              echo "Branch $branch is not merged into Develop or Master. Skipping..."
             fi
           done
