@@ -1,4 +1,4 @@
-name: Delete Old Branches 10 mins
+name: Delete Old Branches 3 Months
 
 on:
   pull_request:
@@ -15,23 +15,23 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
-      - name: Bash script to delete branches older than 10 minutes
+      - name: Bash script to delete branches older than 3 months
         run: |
           git fetch --prune
           # Loop through all remote branches
-          for branch in $(git branch -r | grep -v HEAD | grep -v origin/Develop | grep -v origin/Master | sed '/\*/d'); do
+          for branch in $(git branch -r | grep -v HEAD | grep -v origin/Develop | grep -v origin/Master | grep -v Feature-1 | grep -v Feature-2 | grep -v Feature-3 | grep -v Feature-4 | sed '/\*/d'); do
             remote_branch=$(echo ${branch} | sed 's#origin/##')
 
             # Check if the branch is merged into Develop or Master
             if git branch -r --merged origin/Develop | grep -w ${branch} || git branch -r --merged origin/Master | grep -w ${branch}; then
-              # Check if the branch has no activity in the last 10 minutes
-              if [ -z "$(git log -1 --since='10 minutes ago' -s ${branch})" ]; then
-                echo "Branch $branch is older than 10 minutes and merged. Deleting..."
+              # Check if the branch has no activity in the last 3 months
+              if [ -z "$(git log -1 --since='3 months ago' -s ${branch})" ]; then
+                echo "Branch $branch is older than 3 months and merged. Deleting..."
                 echo -e "$(git show --format='%ci %cr %an' ${branch} | head -n 1) \t $branch"
                 # Uncomment the following line to delete the branch
                 git push origin --delete ${remote_branch}
               else
-                echo "Branch $branch is not older than 10 minutes."
+                echo "Branch $branch is not older than 3 months."
               fi
             else
               echo "Branch $branch is not merged into Develop or Master. Skipping..."
