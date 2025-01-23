@@ -19,7 +19,7 @@ jobs:
         run: |
           git fetch --prune
           # Loop through all remote branches
-          for branch in $(git branch -r | grep -v HEAD | grep -v origin/Develop | grep -v origin/Master | grep -v Feature-1 | grep -v Feature-2 | grep -v Feature-3 | grep -v Feature-4 | sed '/\*/d'); do
+          for branch in $(git branch -r | grep -v HEAD | grep -v origin/Develop | grep -v origin/Master | sed '/\*/d'); do
             remote_branch=$(echo ${branch} | sed 's#origin/##')
 
             # Check if the branch is merged into Develop or Master
