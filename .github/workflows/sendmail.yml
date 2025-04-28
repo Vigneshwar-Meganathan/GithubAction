@@ -1,9 +1,10 @@
 name: Notify on Branch Deletion
 
 on:
+  workflow_dispatch:
   delete:
     branches:
-      - '**'  # Trigger for all deleted branches
+      - '**'  # Trigger for all deleted branch
 
 jobs:
   send_email:
